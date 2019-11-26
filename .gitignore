@@ -181,3 +181,4 @@ CNN_training/old_data/water.model
 CNN_training/examples/
 env/
 _val_set/
+*.model

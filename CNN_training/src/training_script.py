@@ -1,16 +1,15 @@
 # python train.py --dataset dataset --model {name}.model --labelbin lb.pickle
 
-# set the matplotlib backend so figures can be saved in the background
-
 import numpy as np
 from keras_preprocessing.image import ImageDataGenerator
-
-from CNN_training.Dataset import Dataset
+from keras.optimizers import Adam
+from keras.utils import to_categorical
+from CNN_training.src.Dataset import Dataset
 from CNN_training.nnetwork.smallervggnet import SmallerVGGNet
 
 import matplotlib.pyplot as plt
+# set the matplotlib backend so figures can be saved in the background
 import matplotlib
-
 matplotlib.use("Agg")
 
 
@@ -25,24 +24,38 @@ class Trainer:
         self.aug = ImageDataGenerator(rotation_range=25, width_shift_range=0.1,
                                       height_shift_range=0.1, shear_range=0.2, zoom_range=0.2,
                                       horizontal_flip=True, fill_mode="nearest")
-        # self.opt = Adam(lr=INIT_LR, decay=INIT_LR / EPOCHS)
 
         self.model = SmallerVGGNet.build(width=self.dataset.IMAGE_DIMS[1], height=self.dataset.IMAGE_DIMS[0],
-                                         depth=self.dataset.IMAGE_DIMS[2], classes=len(np.unique(self.dataset.labels)))
+                                         depth=self.dataset.IMAGE_DIMS[2], classes=len(self.dataset.lb.classes_))
+
+        self.opt = Adam(lr=self.INIT_LR, decay=self.INIT_LR / self.EPOCHS)
         # COMPILING MODEL
         print("[LOG] Compiling model... ")
-        self.model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=['accuracy'])
+        self.model.compile(loss="categorical_crossentropy", optimizer=self.opt, metrics=['accuracy'])
         print("[LOG] Ready model")
 
     def training_augmented(self):
         print("[LOG] training AUG")
-        net = self.model.fit_generator(self.aug.flow(self.dataset.data, self.dataset.labels, batch_size=self.BS),
-                                       validation_data=(self.dataset.validation_data, self.dataset.val_labels),
-                                       steps_per_epoch=len(self.dataset.data) // self.BS,
-                                       epochs=self.EPOCHS, verbose=1)
+        net = self.model.fit_generator(
+            self.aug.flow(self.dataset.data, self.dataset.labels, batch_size=self.BS),
+            validation_data=(self.dataset.validation_data, self.dataset.val_labels),
+            steps_per_epoch=len(self.dataset.data) // self.BS,
+            epochs=self.EPOCHS)
+
         print("[LOG] saving")
         self.model.save("AUG.model")
         self.plot_it(net)
+
+    def standard_training(self):
+        print("[LOG] training STD")
+        net = self.model.fit(self.dataset.data, self.dataset.labels,
+                             epochs=self.EPOCHS, batch_size=self.BS)
+        print("[LOG] saving")
+        self.model.save("STD.model")
+        self.plot_it(net)
+
+    def test_it(self):
+        pass
 
     def plot_it(self, net):
         # plot the training loss and accuracy
@@ -66,4 +79,4 @@ VAL_PATH = "E:\IT\CNN\_val_set"
 dataSet = Dataset(DATASET_PATH, LABELS_PATH, VAL_PATH)
 
 trainer = Trainer(dataSet)
-trainer.training_augmented()
+trainer.standard_training()

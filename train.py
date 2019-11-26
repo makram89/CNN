@@ -11,7 +11,7 @@ from keras.optimizers import Adam
 from keras.preprocessing.image import img_to_array
 from sklearn.preprocessing import LabelBinarizer
 from sklearn.model_selection import train_test_split
-from image_search_py.small_VGGNet import small_VGGNet
+from CNN_training.nnetwork.smallervggnet import SmallerVGGNet
 import matplotlib.pyplot as plt
 from imutils import paths
 import numpy as np
@@ -35,7 +35,7 @@ args = vars(ap.parse_args())
 
 # initialize the number of epochs to train for, initial learning rate,
 # batch size, and image dimensions
-EPOCHS = 100
+EPOCHS = 10
 INIT_LR = 1e-3
 BS = 32
 IMAGE_DIMS = (96, 96, 3)
@@ -84,7 +84,7 @@ aug = ImageDataGenerator(rotation_range=25, width_shift_range=0.1,
 
 # initialize the model
 print("[INFO] compiling model...")
-model = small_VGGNet.build(width=IMAGE_DIMS[1], height=IMAGE_DIMS[0],
+model = SmallerVGGNet.build(width=IMAGE_DIMS[1], height=IMAGE_DIMS[0],
 	depth=IMAGE_DIMS[2], classes=len(lb.classes_))
 opt = Adam(lr=INIT_LR, decay=INIT_LR / EPOCHS)
 model.compile(loss="categorical_crossentropy", optimizer=opt,

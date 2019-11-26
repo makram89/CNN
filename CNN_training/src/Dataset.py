@@ -3,6 +3,8 @@ import cv2
 from keras_preprocessing.image import img_to_array
 import os
 import numpy as np
+from sklearn.preprocessing import LabelBinarizer
+
 
 class Dataset:
     data = []
@@ -10,7 +12,7 @@ class Dataset:
     labels = []
     val_labels = []
     IMAGE_DIMS = (96, 96, 3)
-
+    lb = LabelBinarizer()
     def __init__(self, dataset_path, label_path, val_path):
         print("[LOG] load data from files ...")
         # self.load_labels(label_path)
@@ -36,6 +38,10 @@ class Dataset:
     def scale_data(self):
         self.data = np.array(self.data, dtype="float") / 255.0
         self.validation_data = np.array(self.data, dtype="float") / 255.0
+        self.labels = np.array(self.labels)
+        self.val_labels = np.array(self.val_labels)
+
+        self.labels = self.lb.fit_transform(self.labels)
 
     def load_labels(self, label_path):
         file = open(label_path, "r")
