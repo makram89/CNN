@@ -7,7 +7,6 @@ from keras.models import load_model
 import numpy as np
 import argparse
 import imutils
-import pickle
 import cv2
 import os
 
@@ -15,10 +14,11 @@ import os
 ap = argparse.ArgumentParser()
 ap.add_argument("-m", "--model", required=True,
                 help="path to trained model model")
-ap.add_argument("-l", "--labelbin", required=False,
-                help="path to label binarizer")
+
 ap.add_argument("-i", "--image", required=True,
                 help="path to input image")
+ap.add_argument("-L", required=True,
+                help="path to input labels")
 args = vars(ap.parse_args())
 
 # load the image
@@ -31,31 +31,34 @@ image = image.astype("float") / 255.0
 image = img_to_array(image)
 image = np.expand_dims(image, axis=0)
 
-# load the trained convolutional neural network and the label
-# binarizer
-print("[INFO] loading network...")
+print("[LOG] loading network...")
 model = load_model(args["model"])
-# lb = pickle.loads(open(args["labelbin"], "rb").read())
+file = open(args["L"], 'r')
+classes = [x[0:-1] for x in file]
+print(classes)
 
 # classify the input image
-print("[INFO] classifying image...")
-proba = model.predict(image)[0]
-idx = np.argmax(proba)
-# label = lb.classes_[idx]
-
-# we'll mark our prediction as "correct" of the input image filename
-# contains the predicted label text (obviously this makes the
-# assumption that you have named your testing image files this way)
-# filename = args["image"][args["image"].rfind(os.path.sep) + 1:]
-# correct = "correct" if filename.rfind(label) != -1 else "incorrect"
+print("[LOG] classifying image...")
+result = model.predict(image)[0]
+idx = np.argmax(result)
+print(idx)
+label_class = classes[idx]
 
 # build the label and draw the label on the image
-label = " {:.2f}% ".format(proba[idx] * 100)
+label = " {} {:.2f}% ".format(label_class, result[idx] * 100) + ""
+
+labels = [" {} {:.2f}% ".format(label_class[i], result[i] * 100) + "/n " for i in range(len(result))]
+
 output = imutils.resize(output, width=400)
 cv2.putText(output, label, (10, 25), cv2.FONT_HERSHEY_SIMPLEX,
+            0.7, (0, 255, 0), 2)
+
+output2 = output.copy()
+cv2.putText(output2, labels, (10, 25), cv2.FONT_HERSHEY_SIMPLEX,
             0.7, (0, 255, 0), 2)
 
 # show the output image
 print("[INFO] {}".format(label))
 cv2.imshow("Output", output)
+cv2.imshow("Output2", output2)
 cv2.waitKey(0)

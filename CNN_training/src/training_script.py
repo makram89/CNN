@@ -16,7 +16,7 @@ matplotlib.use("Agg")
 
 
 class Trainer:
-    EPOCHS = 50
+    EPOCHS = 500
     INIT_LR = 1e-3
     BS = 32
     model = 0
@@ -55,7 +55,7 @@ class Trainer:
             aug.flow(self.dataset.data, self.dataset.labels, batch_size=self.BS),
             validation_data=(self.dataset.validation_data, self.dataset.val_labels),
             steps_per_epoch=len(self.dataset.data) // self.BS,
-            epochs=self.initial_epoch + 50, initial_epoch=self.initial_epoch
+            epochs=self.initial_epoch + self.EPOCHS, initial_epoch=self.initial_epoch
         )
 
         # TODO: if lepszy od modelu to zapisz
