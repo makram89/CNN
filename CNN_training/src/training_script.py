@@ -7,7 +7,7 @@ from keras.utils import to_categorical
 from CNN_training.src.Dataset import Dataset
 from CNN_training.nnetwork.smallervggnet import SmallerVGGNet
 import tensorflow as tf
-
+import keras as k
 import matplotlib.pyplot as plt
 # set the matplotlib backend so figures can be saved in the background
 import matplotlib
@@ -16,10 +16,11 @@ matplotlib.use("Agg")
 
 
 class Trainer:
-    EPOCHS = 200
+    EPOCHS = 50
     INIT_LR = 1e-3
     BS = 32
     model = 0
+    initial_epoch = 0
 
     def __init__(self, dataset):
         print("[LOG] Creating model...")
@@ -38,7 +39,11 @@ class Trainer:
         print("[LOG] Ready model")
 
     def load_(self, model_path):
-        self.model = tf.keras.models.load_model(model_path)
+        self.model = k.models.load_model(model_path)
+        file = open("ep.txt", "r")
+        self.initial_epoch = int(file.read())
+        file.close()
+        print(self.initial_epoch)
 
     def training_augmented(self):
         aug = ImageDataGenerator(rotation_range=25, width_shift_range=0.1,
@@ -50,12 +55,21 @@ class Trainer:
             aug.flow(self.dataset.data, self.dataset.labels, batch_size=self.BS),
             validation_data=(self.dataset.validation_data, self.dataset.val_labels),
             steps_per_epoch=len(self.dataset.data) // self.BS,
-            epochs=self.EPOCHS
+            epochs=self.initial_epoch + 50, initial_epoch=self.initial_epoch
         )
 
+        # TODO: if lepszy od modelu to zapisz
+        print("[LOG] compare")
+
         print("[LOG] saving")
+
+        file = open("ep.txt", "w")
+        file.write(str(self.initial_epoch + self.EPOCHS))
+        file.close()
+
         self.model.save("AUG.model")
         self.plot_it(net)
+
         print("[LOG] Ploted")
 
     def standard_training(self):
@@ -102,5 +116,6 @@ VAL_PATH = "E:\IT\CNN\_val_set"
 dataSet = Dataset(DATASET_PATH, LABELS_PATH, VAL_PATH)
 
 trainer = Trainer(dataSet)
-trainer.create_model()
+# trainer.create_model()
+trainer.load_("AUG.model")
 trainer.training_augmented()
