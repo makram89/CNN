@@ -11,7 +11,7 @@ import imutils
 import cv2
 import os
 from CNN_training.src.Dataset import Dataset
-from PIL import Image
+import matplotlib.pyplot as plt
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-m", "--model", required=False,
@@ -62,6 +62,13 @@ for x in range(len(dataSet.validation_data)):
 
 for x in validation_matrix:
     print(x)
+
+fig, axs = plt.subplots()
+axs.set_title(args["model"].split('\\')[-1], loc='center')
+axs.axis('tight')
+axs.axis('off')
+table = axs.table(cellText=validation_matrix[1:], loc='center', colLabels=validation_matrix[0])
+plt.show()
 
 # # classify the input image
 # print("[LOG] classifying image...")
