@@ -182,3 +182,4 @@ CNN_training/examples/
 env/
 _val_set/
 *.model
+new_dataset/
