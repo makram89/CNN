@@ -1,5 +1,6 @@
 # USAGE
-# python tester.py --model water.model --labelbin lb.pickle --image examples/
+# python new_tester.py --model AUG.model -L labels.txt --image examples/
+# python CNN_training\src\new_tester.py -L CNN_training\labels.txt -m CNN_training\AUG.model -i examples\plane.jpg
 
 # import the necessary packages
 from keras.preprocessing.image import img_to_array
@@ -25,6 +26,7 @@ args = vars(ap.parse_args())
 image = cv2.imread(args["image"])
 output = image.copy()
 
+
 # pre-process the image for classification
 image = cv2.resize(image, (96, 96))
 image = image.astype("float") / 255.0
@@ -40,25 +42,30 @@ print(classes)
 # classify the input image
 print("[LOG] classifying image...")
 result = model.predict(image)[0]
+# print(result)
 idx = np.argmax(result)
-print(idx)
+# print(idx)
+# print(classes[idx])
+# print(result[idx])
 label_class = classes[idx]
 
 # build the label and draw the label on the image
-label = " {} {:.2f}% ".format(label_class, result[idx] * 100) + ""
+label = " {} {:.6f}% ".format(label_class, result[idx] * 100) + ""
 
-labels = [" {} {:.2f}% ".format(label_class[i], result[i] * 100) + "/n " for i in range(len(result))]
+labels = [" {} {:.6f}x1000 ".format(classes[i], result[i] * 1000) for i in range(len(result))]
+# labels = '; \n '.join(labels)
 
-output = imutils.resize(output, width=400)
+output = imutils.resize(output, width=480)
+output2 = output.copy()
+
 cv2.putText(output, label, (10, 25), cv2.FONT_HERSHEY_SIMPLEX,
             0.7, (0, 255, 0), 2)
-
-output2 = output.copy()
-cv2.putText(output2, labels, (10, 25), cv2.FONT_HERSHEY_SIMPLEX,
-            0.7, (0, 255, 0), 2)
+for x in range(len(labels)):
+    cv2.putText(output2, labels[x], (50, x*20+50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (150, 150, 0), 1)
 
 # show the output image
 print("[INFO] {}".format(label))
 cv2.imshow("Output", output)
 cv2.imshow("Output2", output2)
 cv2.waitKey(0)
+cv2.destroyAllWindows()

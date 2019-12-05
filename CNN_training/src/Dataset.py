@@ -9,8 +9,10 @@ from sklearn.preprocessing import LabelBinarizer
 class Dataset:
     data = []
     validation_data = []
+    validation_data_images = []
     labels = []
     val_labels = []
+    val_labels_txt = []
     IMAGE_DIMS = (96, 96, 3)
     lb = LabelBinarizer()
 
@@ -19,6 +21,7 @@ class Dataset:
         # self.load_labels(label_path)
         self.data, self.labels = self.load_images(dataset_path)
         self.validation_data, self.val_labels = self.load_images(val_path)
+        self.val_labels_txt = self.val_labels.copy()
         self.classes = list(dict.fromkeys(self.labels))
 
         self.scale_data()
@@ -70,3 +73,10 @@ class Dataset:
 
     def check_ok(self):
         [print(x) for x in self.labels]
+
+    def load_only_images(self, dataset_path):
+        temp_data = []
+        imagePaths = sorted(list(paths.list_images(dataset_path)))
+        for imagePath in imagePaths:
+            temp_data.append(imagePath)
+        self.validation_data_images = temp_data

@@ -16,7 +16,7 @@ matplotlib.use("Agg")
 
 
 class Trainer:
-    EPOCHS = 500
+    EPOCHS = 100
     INIT_LR = 1e-3
     BS = 32
     model = 0
@@ -116,6 +116,6 @@ VAL_PATH = "E:\IT\CNN\_val_set"
 dataSet = Dataset(DATASET_PATH, LABELS_PATH, VAL_PATH)
 
 trainer = Trainer(dataSet)
-# trainer.create_model()
-trainer.load_("AUG.model")
+trainer.create_model()
+# trainer.load_("AUG.model")
 trainer.training_augmented()
